@@ -16,7 +16,7 @@ app.use(express.json())
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.2rn0dld.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,18 +34,39 @@ async function run() {
         // await client.connect();
 
         const repairServices = client.db('repairBD').collection('services')
+        const collectionPurchase = client.db('PurchaseDB').collection('Purchase')
 
-        app.get('/services', async(req, res)=>{
+        app.get('/services', async (req, res) => {
             const service = repairServices.find()
             const result = await service.toArray()
             res.send(result)
         })
 
-        app.post('/services', async(req, res)=>{
+        app.get('/service_details/:id', async(req, res) => {
+            const id = req.params.id
+            const query = {_id: new ObjectId(id)}
+            const result = await repairServices.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/purchase', async(req, res)=>{
+            const purchase = await collectionPurchase.find().toArray()
+            res.send(purchase)
+        })
+
+        app.post('/services', async (req, res) => {
             const user = req.body
             const result = await repairServices.insertOne(user)
             res.send(result)
         })
+
+        app.post('/purchase', async(req, res)=>{
+            const purchase = req.body
+            const result = await collectionPurchase.insertOne(purchase)
+            res.send(result)
+        })
+
+
 
 
 
