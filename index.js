@@ -49,6 +49,15 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/services/:email', async(req, res)=>{
+            const email = req.params.email
+            const query = {providerEmail: email}
+            const cursor = repairServices.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+           
+        })
+
         app.get('/purchase', async(req, res)=>{
             const purchase = await collectionPurchase.find().toArray()
             res.send(purchase)
