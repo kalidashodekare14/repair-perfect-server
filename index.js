@@ -4,13 +4,13 @@ require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
 
-// repair-perfect
-// uQNK4auYKtAc0Bs8
-
 
 
 // middleware
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173/'],
+    credentials: true
+}))
 app.use(express.json())
 
 
@@ -30,6 +30,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
+
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
@@ -41,6 +42,8 @@ async function run() {
             const result = await service.toArray()
             res.send(result)
         })
+
+        
 
         app.get('/service_details/:id', async (req, res) => {
             const id = req.params.id
@@ -87,11 +90,19 @@ async function run() {
 
         })
 
-
-
         app.get('/purchase', async (req, res) => {
             const purchase = await collectionPurchase.find().toArray()
             res.send(purchase)
+        })
+
+
+        app.get('/purchase/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { provider_email: email }
+            const cursor = collectionPurchase.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+
         })
 
         app.post('/services', async (req, res) => {
