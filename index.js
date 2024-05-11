@@ -44,7 +44,7 @@ async function run() {
             const result = await service.toArray()
             res.send(result)
         })
-        
+
 
         app.get('/service_details/:id', async (req, res) => {
             const id = req.params.id
@@ -69,10 +69,10 @@ async function run() {
             res.send(result)
         })
 
-        app.put('/update_services/:id', async(req, res) => {
+        app.put('/update_services/:id', async (req, res) => {
             const id = req.params.id
-            const filter = {_id: new ObjectId(id)}
-            const options = {upsert: true}
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
             const servicesManage = req.body
             const update = {
                 $set: {
@@ -96,6 +96,11 @@ async function run() {
             res.send(purchase)
         })
 
+        app.get('/service_to_do', async (req, res) => {
+            const toDo = await collectionPurchase.find().toArray()
+            res.send(toDo)
+        })
+
 
         app.get('/purchase/:email', async (req, res) => {
             const email = req.params.email
@@ -115,6 +120,18 @@ async function run() {
         app.post('/purchase', async (req, res) => {
             const purchase = req.body
             const result = await collectionPurchase.insertOne(purchase)
+            res.send(result)
+        })
+
+        app.patch('/purchase/:id', async(req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const serviceStatus = req.body
+            console.log(req.body)
+            const statusUpdate = {
+                $set: {...serviceStatus}
+            }
+            const result = await collectionPurchase.updateOne(query, statusUpdate)
             res.send(result)
         })
 
