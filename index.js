@@ -44,7 +44,6 @@ async function run() {
             const result = await service.toArray()
             res.send(result)
         })
-
         
 
         app.get('/service_details/:id', async (req, res) => {
