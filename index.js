@@ -42,23 +42,54 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/service_details/:id', async(req, res) => {
+        app.get('/service_details/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await repairServices.findOne(query)
             res.send(result)
         })
 
-        app.get('/services/:email', async(req, res)=>{
+        app.get('/services/:email', async (req, res) => {
             const email = req.params.email
-            const query = {providerEmail: email}
+            const query = { providerEmail: email }
             const cursor = repairServices.find(query)
             const result = await cursor.toArray()
             res.send(result)
-           
+
         })
 
-        app.get('/purchase', async(req, res)=>{
+        app.get('/update_services/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await repairServices.findOne(query)
+            res.send(result)
+        })
+
+        app.put('/update_services/:id', async(req, res) => {
+            const id = req.params.id
+            const filter = {_id: new ObjectId(id)}
+            const options = {upsert: true}
+            const servicesManage = req.body
+            const update = {
+                $set: {
+                    ...servicesManage
+                }
+            }
+            const result = await repairServices.updateOne(filter, update, options)
+            res.send(result)
+        })
+
+        app.delete('/services/:id', async (req, res) => {
+            const deleteInfo = req.params.id
+            const query = { _id: new ObjectId(deleteInfo) }
+            const result = await repairServices.deleteOne(query)
+            res.send(result)
+
+        })
+
+
+
+        app.get('/purchase', async (req, res) => {
             const purchase = await collectionPurchase.find().toArray()
             res.send(purchase)
         })
@@ -69,7 +100,7 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/purchase', async(req, res)=>{
+        app.post('/purchase', async (req, res) => {
             const purchase = req.body
             const result = await collectionPurchase.insertOne(purchase)
             res.send(result)
