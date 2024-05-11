@@ -7,10 +7,7 @@ const port = process.env.PORT || 5000
 
 
 // middleware
-app.use(cors({
-    origin: ['http://localhost:5173/'],
-    credentials: true
-}))
+app.use(cors())
 app.use(express.json())
 
 
@@ -27,6 +24,11 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+
+// middleware verification
+
+
 
 async function run() {
     try {
@@ -98,7 +100,7 @@ async function run() {
 
         app.get('/purchase/:email', async (req, res) => {
             const email = req.params.email
-            const query = { provider_email: email }
+            const query = { current_user_email: email }
             const cursor = collectionPurchase.find(query)
             const result = await cursor.toArray()
             res.send(result)
