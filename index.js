@@ -1,5 +1,8 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
@@ -7,13 +10,17 @@ const port = process.env.PORT || 5000
 
 
 // middleware
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    credentials: true
+}))
 app.use(express.json())
+app.use(cookieParser())
 
 
 
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.2rn0dld.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -28,7 +35,37 @@ const client = new MongoClient(uri, {
 
 // middleware verification
 
+const logged = (req, res, next) => {
+    const token = req.cookies.token
+    console.log('check logged', token)
 
+    next()
+}
+
+const verifyToken = (req, res, next) => {
+    const token = req.cookies?.token
+    if (!token) {
+        return res.status(401).send({ message: 'unauthorize access' })
+    }
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: 'unauthorize access' })
+        }
+        req.user = decoded
+        next()
+    })
+
+}
+
+
+
+// cookies options
+const cookiesOpiton = {
+    httpOnly: true,
+    secure: false
+    // secure: process.env.NODE_ENV === 'production' ? true : false,
+    // sameSite: process.env.NODE_ENV = 'production' ? 'none' : 'strict',
+}
 
 async function run() {
     try {
@@ -38,6 +75,22 @@ async function run() {
 
         const repairServices = client.db('repairBD').collection('services')
         const collectionPurchase = client.db('PurchaseDB').collection('Purchase')
+
+
+        app.post('/jwt', logged, async (req, res) => {
+            const user = req.body
+            console.log(user)
+            const token = jwt.sign(user, process.env.SECRET, { expiresIn: '1d' })
+            res.cookie('token', token, cookiesOpiton)
+                .send({ success: true })
+
+        })
+
+        app.post('/logout', (req, res) => {
+            const user = req.body
+            console.log('loggout', user)
+            res.clearCookie('token', { ...cookiesOpiton, maxAge: 0 }).send({ success: true })
+        })
 
         app.get('/services', async (req, res) => {
             const service = repairServices.find()
@@ -53,7 +106,11 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/services/:email', async (req, res) => {
+        app.get('/services/:email', logged, verifyToken, async (req, res) => {
+            if (req.user?.email !== req.params.email) {
+                return res.status(403).send({ messsage: 'forbidden access' })
+            }
+            console.log('tok tok token', req.cookies)
             const email = req.params.email
             const query = { providerEmail: email }
             const cursor = repairServices.find(query)
@@ -91,7 +148,7 @@ async function run() {
 
         })
 
-        app.get('/purchase', async (req, res) => {
+        app.get('/purchase', logged, verifyToken, async (req, res) => {
             const purchase = await collectionPurchase.find().toArray()
             res.send(purchase)
         })
@@ -102,7 +159,10 @@ async function run() {
         })
 
 
-        app.get('/purchase/:email', async (req, res) => {
+        app.get('/purchase/:email', logged, verifyToken, async (req, res) => {
+            if (req.user?.email !== req.params.email) {
+                return res.status(403).send({ messsage: 'forbidden access' })
+            }
             const email = req.params.email
             const query = { current_user_email: email }
             const cursor = collectionPurchase.find(query)
@@ -123,13 +183,13 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/purchase/:id', async(req, res) => {
+        app.patch('/purchase/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const serviceStatus = req.body
             console.log(req.body)
             const statusUpdate = {
-                $set: {...serviceStatus}
+                $set: { ...serviceStatus }
             }
             const result = await collectionPurchase.updateOne(query, statusUpdate)
             res.send(result)
