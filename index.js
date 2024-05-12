@@ -153,9 +153,15 @@ async function run() {
             res.send(purchase)
         })
 
-        app.get('/service_to_do', async (req, res) => {
-            const toDo = await collectionPurchase.find().toArray()
-            res.send(toDo)
+       
+
+        app.get('/service_to_do/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { provider_email: email }
+            const cursor = collectionPurchase.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+
         })
 
 
