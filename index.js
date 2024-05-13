@@ -98,6 +98,13 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/detail/:id', async(req, res) => {
+            const id = req.params.id
+            const query = {_id: new ObjectId(id)}
+            const result = await repairServices.findOne(query)
+            res.send(result)
+        })
+
 
         app.get('/service_details/:id', async (req, res) => {
             const id = req.params.id
@@ -153,7 +160,7 @@ async function run() {
             res.send(purchase)
         })
 
-       
+
 
         app.get('/service_to_do/:email', async (req, res) => {
             const email = req.params.email
