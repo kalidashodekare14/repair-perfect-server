@@ -11,7 +11,12 @@ const port = process.env.PORT || 5000
 
 // middleware
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: [
+        'http://localhost:5173',
+        'https://repair-perfect.web.app',
+        'https://repair-perfect.firebaseapp.com',
+    ],
+
     credentials: true
 }))
 app.use(express.json())
@@ -62,9 +67,9 @@ const verifyToken = (req, res, next) => {
 // cookies options
 const cookiesOpiton = {
     httpOnly: true,
-    secure: false
-    // secure: process.env.NODE_ENV === 'production' ? true : false,
-    // sameSite: process.env.NODE_ENV = 'production' ? 'none' : 'strict',
+    // secure: false,
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: process.env.NODE_ENV = "production" ? 'none' : 'strict',
 }
 
 async function run() {
