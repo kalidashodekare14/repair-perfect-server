@@ -69,7 +69,7 @@ const cookiesOpiton = {
     httpOnly: true,
     // secure: false,
     secure: process.env.NODE_ENV === "production" ? true : false,
-    sameSite: process.env.NODE_ENV = "production" ? 'none' : 'strict',
+    sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',
 }
 
 async function run() {
@@ -101,7 +101,7 @@ async function run() {
             const page = parseInt(req.query.page)
             const size = parseInt(req.query.size)
 
-            console.log('pak pak', req.query)
+            // console.log('pak pak', req.query)
             const service = await repairServices.find()
             .skip(page * size)
             .limit(size)
@@ -218,7 +218,7 @@ async function run() {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const serviceStatus = req.body
-            console.log(req.body)
+            // console.log(req.body)
             const statusUpdate = {
                 $set: { ...serviceStatus }
             }
