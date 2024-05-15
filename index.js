@@ -98,9 +98,15 @@ async function run() {
         })
 
         app.get('/services', async (req, res) => {
-            const service = repairServices.find()
-            const result = await service.toArray()
-            res.send(result)
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+
+            console.log('pak pak', req.query)
+            const service = await repairServices.find()
+            .skip(page * size)
+            .limit(size)
+            .toArray()
+            res.send(service)
         })
 
         app.get('/detail/:id', async(req, res) => {
@@ -136,6 +142,14 @@ async function run() {
             const result = await repairServices.findOne(query)
             res.send(result)
         })
+
+
+        app.get('/service_count', async(req, res)=>{
+            const count = await repairServices.estimatedDocumentCount()
+            res.send({count})
+        })
+
+
 
         app.put('/update_services/:id', async (req, res) => {
             const id = req.params.id
