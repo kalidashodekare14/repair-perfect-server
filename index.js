@@ -124,11 +124,10 @@ async function run() {
             }
             console.log('tok tok token', req.cookies)
             const email = req.params.email
-            const query = { providerEmail: email }
+            const query = {'provider.email': email }
             const cursor = repairServices.find(query)
             const result = await cursor.toArray()
             res.send(result)
-
         })
 
         app.get('/update_services/:id', async (req, res) => {
@@ -169,7 +168,7 @@ async function run() {
 
         app.get('/service_to_do/:email', async (req, res) => {
             const email = req.params.email
-            const query = { provider_email: email }
+            const query = { 'provider.email': email }
             const cursor = collectionPurchase.find(query)
             const result = await cursor.toArray()
             res.send(result)
